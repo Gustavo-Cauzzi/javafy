@@ -2,7 +2,7 @@ import * as React from 'react';
 import clsx from 'clsx';
 import { styled } from '@mui/system';
 import { useSwitch, UseSwitchProps } from '@mui/base/SwitchUnstyled';
-import { main } from '../../Theme';
+import { mainColor } from '../../Theme';
 
 const blue = {
   500: '#007FFF',
@@ -20,7 +20,7 @@ const CustomSwitchRoot = styled('span')`
   width: 40px;
   height: 20px;
   margin: 10px;
-  background: ${main};
+  background: ${mainColor};
   border-radius: 10px;
   cursor: pointer;
 
@@ -30,7 +30,7 @@ const CustomSwitchRoot = styled('span')`
   }
 
   &.Switch-checked {
-    background: ${main};
+    background: ${mainColor};
   }
 `;
 
