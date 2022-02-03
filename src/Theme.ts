@@ -39,6 +39,12 @@ export const theme = createTheme({
         },
     },
     components: {
+        MuiTooltip: {
+            defaultProps: {
+                arrow: true,
+                placement: 'top',
+            },
+        },
         MuiAutocomplete: {
             styleOverrides: {
                 listbox: AutocompletePopperStyles,

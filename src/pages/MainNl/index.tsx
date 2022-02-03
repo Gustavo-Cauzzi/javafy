@@ -1,10 +1,11 @@
-import { Autocomplete, Button, TextField } from '@mui/material';
+import { Autocomplete, Button, Checkbox, IconButton, Input, TextField, Tooltip } from '@mui/material';
 import useTheme from '@mui/material/styles/useTheme';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import CustomSwitch from '../../shared/components/CustomSwitch';
 import { darkColor, lightColor } from '../../Theme';
-import { toCamel } from '../../utils/Utils';
+import { getMainTableName, standardizeParamsInQuery, toCamel, indentStringWithTab } from '../../utils/Utils';
+import { FiInfo } from 'react-icons/fi';
 
 type Projects = Array<{
   id: number;
@@ -15,6 +16,7 @@ interface Config {
   defaultVar: string;
   customFormatString: (str: string, v?: string) => string;
   addJavaSpecials: (str: string, v?: string) => string;
+  queryIndentLevel: number;
 }
 
 interface ProjectConfig {
@@ -25,61 +27,90 @@ const projects: Projects = [
   { id: 0, label: 'Padrão' },
   { id: 1, label: 'Controle de desperdícios' },
   { id: 2, label: 'NLWeb' },
-  { id: 3, label: 'Novo RE' },
+  // { id: 3, label: 'Novo RE' },
 ];
 
 const projectConfiguration: ProjectConfig = {
   0: {
     defaultVar: 'sql',
+    queryIndentLevel: 0,
     customFormatString: (str: string, v?: string) => str,
     addJavaSpecials: (str: string, v?: string) => str,
   },
   1: {
     defaultVar: 'sql',
-    customFormatString: function (str: string) {
-      const params = str
-        .split(' ')
-        .filter(word => word.includes('par_'))
-        .map(param => `par_${toCamel(param.split(':par_')[1])}`);
-
-      let index = 0;
-
-      str = str
-        .split(' ')
-        .map(word => (word.includes('par_') ? `:${params[index++]}` : word))
-        .join(' ');
-
-      return str;
-    },
+    customFormatString: standardizeParamsInQuery,
+    queryIndentLevel: 0,
     addJavaSpecials: function (str: string, v?: string) {
       const params = Array.from(
         new Set(
           str
             .split(' ')
             .filter(word => word.includes('par_'))
-            .map(param => param.replace(')', '')),
+            .map(param => param.replaceAll(')', ''))
+            .map(param => param.replaceAll('(', '')),
         ),
       );
 
-      //prettier-ignore
-      return `
+      return (
+        `
         ${str}
         \nQuery query = em.createNativeQuery(${v ?? this.defaultVar}.toString(), Tuple.class);
-        ${
-          params.map(param =>
-            `\nquery.setParameter("${param.replace(':', '')}", ${param.replace(':', '').split('par_')[1]});`
-          ).join('')
-        }
-      `;
+        ${params
+          .map(
+            param => `\nquery.setParameter("${param.replace(':', '')}", ${param.replace(':', '').split('par_')[1]});`,
+          )
+          .join('')}
+        `.trimEnd() +
+        '\n\ntry {' +
+        '\n    return NativeUtils.convertResultList((List<Tuple>) query.getResultList(), SelectVO.class);' +
+        '\n} catch (NlMsgErroException e) {' +
+        '\n    e.printStackTrace();' +
+        '\n}' +
+        '\n' +
+        '\nreturn Collections.emptyList();'
+      );
     },
   },
   2: {
     defaultVar: 'sql',
-    customFormatString: (str: string, v?: string) => str,
-    addJavaSpecials: (str: string, v?: string) => str,
+    customFormatString: standardizeParamsInQuery,
+    queryIndentLevel: 1,
+    addJavaSpecials: function (str: string, v?: string) {
+      console.log(': a');
+      str = str
+        .split('\n')
+        .map(line => {
+          if (line.includes('.append("')) {
+            while (line.includes('  ");')) line = line.replaceAll('  ");', ' ");');
+          }
+          return line;
+        })
+        .join('\n');
+
+      const tableNameQuery = toCamel(
+        `query_${
+          getMainTableName(
+            str
+              .split('\n')
+              .filter(line => line.includes('.append("'))
+              .join('\n'),
+          ) ?? 'Tabela'
+        }`,
+      );
+
+      return [
+        `if (${tableNameQuery} == null) {`,
+        ...indentStringWithTab(str, this.queryIndentLevel).split('\n'),
+        '}',
+        '',
+        `return ${tableNameQuery};`,
+      ].join('\n');
+    },
   },
   3: {
     defaultVar: 'sb',
+    queryIndentLevel: 0,
     customFormatString: (str: string, v?: string) => str,
     addJavaSpecials: (str: string, v?: string) => str,
   },
@@ -88,6 +119,14 @@ const projectConfiguration: ProjectConfig = {
 type Project = Projects[number];
 
 const defaultProject = localStorage.getItem('@javafy/projects');
+
+const unjavafyJavaQuery = (stringWithJavaContent: string) => {
+  return stringWithJavaContent
+    .split('\n')
+    .filter(line => line.includes('.append("'))
+    .map(line => line.trim())
+    .join('\n');
+};
 
 const MainNl: React.FC = () => {
   const [javafy, setJavafy] = useState(true);
@@ -98,6 +137,13 @@ const MainNl: React.FC = () => {
   const [project, setProject] = useState<Project>(
     defaultProject ? (JSON.parse(defaultProject) as Project) : projects[0],
   );
+  const [noJavaQuery, setNoJavaQuery] = useState(
+    Boolean(JSON.parse(localStorage.getItem('@javafy/removeJava') ?? '0') as number),
+  );
+
+  useEffect(() => {
+    if (text1) handleJavafy();
+  }, [project]);
 
   const handleJavafy = () => {
     if (varName === '') {
@@ -116,9 +162,10 @@ const MainNl: React.FC = () => {
       return;
     }
 
-    const formattedString = projectConfiguration[project.id].customFormatString(text1, varName);
+    let splitedByLine = text1.split('\n');
+    splitedByLine = splitedByLine.map(line => line.trimEnd());
+    splitedByLine = projectConfiguration[project.id].customFormatString(splitedByLine.join('\n'), varName).split('\n');
 
-    const splitedByLine = formattedString.split('\n');
     let biggestLine = 0;
     let leastAmountOfSpacesAtTheBegining = Infinity;
 
@@ -176,27 +223,59 @@ const MainNl: React.FC = () => {
     setText2(value.trim());
   };
 
+  const noJavaQueryChange = (newValue: string) => {
+    setText2(state => {
+      const splittedByLine = state.split('\n');
+      const queryBeginning = splittedByLine.findIndex(line => line.includes('append("'));
+
+      const javaCode = splittedByLine.filter(line => !line.includes('.append("'));
+
+      return [
+        ...javaCode.filter((_, i) => i < queryBeginning),
+        ...indentStringWithTab(newValue, projectConfiguration[project.id].queryIndentLevel).split('\n'),
+        ...javaCode.filter((_, i) => i >= queryBeginning),
+      ].join('\n');
+    });
+  };
+
   return (
     <>
-      <div className="absolute top-0 right-0 left-0 py-1.5 px-4">
-        <div>
+      <div className="lg:absolute lg:top-0 lg:left-0 py-3 px-10 flex justify-center lg:justify-start relative w-full">
+        <div className="flex gap-5 w-full items-center">
           <Autocomplete
             options={projects}
             value={project}
             onChange={(e, newValue) => {
               if (!newValue) console.error('Autocomplete foi limpo. este comportamento não é previsto!');
-              localStorage.setItem('@javafy/projects', JSON.stringify(newValue));
               if (newValue && !didUserChangeVarName) setVarName(projectConfiguration[newValue.id].defaultVar);
+
+              localStorage.setItem('@javafy/projects', JSON.stringify(newValue));
               setProject(newValue ?? projects[0]);
             }}
+            fullWidth
             isOptionEqualToValue={(option, value) => option.id === value.id}
-            renderInput={params => <TextField {...params} />}
-            style={{ maxWidth: 350 }}
+            renderInput={params => <TextField {...params} label="Projeto" />}
+            className="lg:max-w-xs"
+            disableClearable
+            getOptionDisabled={option => option.id === 3}
           />
+          <div className="hidden lg:block">
+            <Tooltip
+              title="Escolhendo o projeto, o conversor irá assumir os padrões estabelecidos para cada um deles"
+              arrow
+              placement="bottom"
+            >
+              <div>
+                <IconButton>
+                  <FiInfo />
+                </IconButton>
+              </div>
+            </Tooltip>
+          </div>
         </div>
       </div>
 
-      <div className="py-10 flex w-full justify-center items-center flex-col">
+      <div className="pb-10 pt-6 lg:pt-10 flex w-full justify-center items-center flex-col lg:mt-0">
         <h1 className="text-3xl">{javafy ? 'Javafy SQL' : 'SQLify Java'}</h1>
         <h3 className="text-lg">
           ou troque para{' '}
@@ -213,7 +292,7 @@ const MainNl: React.FC = () => {
           fullWidth
           minRows={15}
           onChange={e => setText1(e.target.value)}
-          placeholder={javafy ? 'Paste your sql here' : 'Paste your java here'}
+          placeholder={javafy ? 'Coloque seu SQL aqui' : 'Coloque seu java aqui'}
         ></TextField>
         <div className="flex flex-row lg:flex-col justify-around lg:justify-start w-full items-center lg:max-w-24 gap-7 px-2 py-4">
           <Button variant="contained" onClick={javafy ? handleJavafy : handleSQLify}>
@@ -241,14 +320,35 @@ const MainNl: React.FC = () => {
               error={varName.length === 0}
             />
           )}
+
+          {javafy && (
+            <Tooltip
+              arrow
+              placement="top"
+              title="Irá deixar apenas a query. Não irá por outras linhas de java como a declaração do StringBuilder, etc."
+              enterDelay={400}
+            >
+              <div className="flex gap-0.5 items-center lg:flex-col justify-center">
+                <Checkbox
+                  checked={noJavaQuery}
+                  color="primary"
+                  onChange={(e, checked) => {
+                    localStorage.setItem('@javafy/removeJava', JSON.stringify(Number(!noJavaQuery)));
+                    setNoJavaQuery(checked);
+                  }}
+                />
+                <span className="text-center">Remover java</span>
+              </div>
+            </Tooltip>
+          )}
         </div>
         <TextField
-          value={text2}
-          onChange={e => setText2(e.target.value)}
+          value={noJavaQuery ? unjavafyJavaQuery(text2) : text2}
+          onChange={e => (noJavaQuery ? noJavaQueryChange(e.target.value) : setText2(e.target.value))}
           multiline
           fullWidth
           minRows={15}
-          placeholder={javafy ? 'Here is your javafied query...' : 'Here is your SQL query...'}
+          placeholder={javafy ? 'Aqui está sua query no java...' : 'Aqui está sua query sql...'}
         ></TextField>
       </div>
     </>

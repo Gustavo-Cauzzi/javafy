@@ -73,6 +73,10 @@ export default function CustomSwitch(props: UseSwitchProps) {
   const { getInputProps, checked: c, disabled, focusVisible } = useSwitch(props);
   const [checked, setChecked] = React.useState(c);
 
+  React.useEffect(() => {
+    setChecked(c);
+  }, [c]);
+
   const stateClasses = {
     'Switch-checked': checked,
     'Switch-disabled': disabled,

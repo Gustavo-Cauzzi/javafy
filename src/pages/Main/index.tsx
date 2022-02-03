@@ -2,11 +2,13 @@ import { Button, TextField } from '@mui/material';
 import useTheme from '@mui/material/styles/useTheme';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import CustomSwitch from '../../shared/components/CustomSwitch';
 import { darkColor, lightColor } from '../../Theme';
 
 const Main: React.FC = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const [javafy, setJavafy] = useState(true);
   const [varName, setVarName] = useState('sql');
@@ -94,6 +96,8 @@ const Main: React.FC = () => {
 
   return (
     <>
+      <button className="hidden" id="goto" onClick={() => navigate('/nl')}></button>
+
       <div className="py-10 flex w-full justify-center items-center flex-col">
         <h1 className="text-3xl">{javafy ? 'Javafy SQL' : 'SQLify Java'}</h1>
         <h3 className="text-lg">
