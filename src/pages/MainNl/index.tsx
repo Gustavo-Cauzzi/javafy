@@ -1,11 +1,10 @@
-import { Autocomplete, Button, Checkbox, IconButton, Input, TextField, Tooltip } from '@mui/material';
-import useTheme from '@mui/material/styles/useTheme';
+import { Autocomplete, Button, Checkbox, IconButton, TextField, Tooltip } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { FiInfo } from 'react-icons/fi';
 import CustomSwitch from '../../shared/components/CustomSwitch';
 import { darkColor, lightColor } from '../../Theme';
-import { getMainTableName, standardizeParamsInQuery, toCamel, indentStringWithTab } from '../../utils/Utils';
-import { FiInfo } from 'react-icons/fi';
+import { getMainTableName, indentStringWithTab, standardizeParamsInQuery, toCamel } from '../../utils/Utils';
 
 type Projects = Array<{
   id: number;
