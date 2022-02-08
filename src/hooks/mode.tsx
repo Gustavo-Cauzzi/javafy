@@ -10,7 +10,7 @@ interface ModeContextData {
 
 const ModeContext = createContext<ModeContextData>({} as ModeContextData);
 
-const darkModeSaved = localStorage.get('@javafy:darkMode'); // 0 ou 1
+const darkModeSaved = localStorage.getItem('@javafy:darkMode'); // 0 ou 1
 const didUserSetDarkMode = darkModeSaved ? Boolean(JSON.parse(darkModeSaved)) : false;
 
 const ModeProvider: React.FC = ({ children }) => {

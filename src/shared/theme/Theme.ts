@@ -5,6 +5,9 @@ export const lightColor = '#e6e9d9';
 export const mainColor = darken('#e6e9d9', 0.45);
 export const darkColor = darken('#e6e9d9', 0.65);
 
+const isDarkMode = (mode: Mode) => mode === 'dark';
+const getCurrentPallete = (mode: Mode) => (isDarkMode(mode) ? { mode, ...darkPalette } : { mode, ...lightPalette });
+
 const lightPalette = {
     primary: {
         light: lightColor,
@@ -23,10 +26,10 @@ const darkPalette = {
     background: { default: '#2B2C29' },
 };
 
-const AutocompletePopperStyles = {
-    backgroundColor: lighten(lightColor, 0.25),
+const AutocompletePopperStyles = (mode: Mode) => ({
+    backgroundColor: lighten(getCurrentPallete(mode).background.default, 0.1),
     fontSize: '13px',
-    color: 'rgba(0, 0, 0, 0.64)',
+    color: isDarkMode(mode) ? 'rgba(255, 255, 255, 0.64)' : 'rgba(0, 0, 0, 0.64)',
     '&.MuiAutocomplete-loading': {
         fontWeight: 'bold',
     },
@@ -35,22 +38,22 @@ const AutocompletePopperStyles = {
     },
 
     '&::-webkit-scrollbar-track': {
-        background: lighten(lightColor, 0.25),
+        background: lighten(getCurrentPallete(mode).background.default, 0.25),
     },
 
     '&::-webkit-scrollbar-thumb': {
-        background: '#b3b3b3',
+        background: lighten(getCurrentPallete(mode).primary.light, 0.4),
         borderRadius: '10px',
     },
 
     '&::-webkit-scrollbar-thumb:hover': {
-        background: '#9e9e9e',
+        background: lighten(getCurrentPallete(mode).primary.light, 0.5),
     },
-};
+});
 
 export const theme = (mode: Mode) =>
     createTheme({
-        palette: mode === 'light' ? { mode, ...lightPalette } : { mode, ...darkPalette },
+        palette: getCurrentPallete(mode),
         components: {
             MuiTooltip: {
                 defaultProps: {
@@ -60,9 +63,9 @@ export const theme = (mode: Mode) =>
             },
             MuiAutocomplete: {
                 styleOverrides: {
-                    listbox: AutocompletePopperStyles,
-                    noOptions: AutocompletePopperStyles,
-                    loading: AutocompletePopperStyles,
+                    listbox: AutocompletePopperStyles(mode),
+                    noOptions: AutocompletePopperStyles(mode),
+                    loading: AutocompletePopperStyles(mode),
                     inputRoot: {
                         padding: '4px 12px',
                         paddingBottom: '4px !important',
@@ -70,7 +73,9 @@ export const theme = (mode: Mode) =>
                     root: {
                         '& .MuiAutocomplete-inputRoot:not(.Mui-disabled) .MuiAutocomplete-endAdornment': {
                             svg: {
-                                color: mainColor,
+                                color: isDarkMode(mode)
+                                    ? getCurrentPallete(mode).primary.light
+                                    : getCurrentPallete(mode).primary.dark,
                             },
                         },
                         '.MuiAutocomplete-popper': {
