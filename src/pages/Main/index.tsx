@@ -1,13 +1,11 @@
 import { Button, TextField } from '@mui/material';
-import useTheme from '@mui/material/styles/useTheme';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import CustomSwitch from '../../shared/components/CustomSwitch';
-import { darkColor, lightColor } from '../../Theme';
+import { darkColor, lightColor } from '../../shared/theme/Theme';
 
 const Main: React.FC = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
 
   const [javafy, setJavafy] = useState(true);
@@ -17,7 +15,6 @@ const Main: React.FC = () => {
 
   const handleJavafy = () => {
     if (varName === '') {
-      console.log(theme);
       toast.error('I need to know the name of the variable 😢', {
         style: {
           border: `1px solid ${darkColor}`,

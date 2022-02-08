@@ -1,14 +1,18 @@
-import { ThemeProvider } from '@emotion/react';
+import { ThemeProvider } from '@mui/material';
 import { Toaster } from 'react-hot-toast';
+import StateProviders from './hooks';
 import Router from './routes';
-import { theme } from './Theme';
+import JavafyTheme from './shared/theme';
+import { theme } from './shared/theme/Theme';
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider theme={theme}>
-      <Toaster />
-      <Router />
-    </ThemeProvider>
+    <StateProviders>
+      <JavafyTheme>
+        <Toaster />
+        <Router />
+      </JavafyTheme>
+    </StateProviders>
   );
 };
 

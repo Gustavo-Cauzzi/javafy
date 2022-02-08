@@ -2,7 +2,8 @@ import * as React from 'react';
 import clsx from 'clsx';
 import { styled } from '@mui/system';
 import { useSwitch, UseSwitchProps } from '@mui/base/SwitchUnstyled';
-import { mainColor } from '../../Theme';
+import { useMode } from '../../hooks/designMode';
+import { useTheme } from '@mui/material';
 
 const blue = {
   500: '#007FFF',
@@ -13,14 +14,18 @@ const grey = {
   500: '#AAB4BE',
 };
 
-const CustomSwitchRoot = styled('span')`
+interface CustomSwitchProps {
+  color: string;
+}
+
+const CustomSwitchRoot = styled('span')<CustomSwitchProps>`
   font-size: 0;
   position: relative;
   display: inline-block;
   width: 40px;
   height: 20px;
   margin: 10px;
-  background: ${mainColor};
+  background: ${props => props.color};
   border-radius: 10px;
   cursor: pointer;
 
@@ -30,7 +35,7 @@ const CustomSwitchRoot = styled('span')`
   }
 
   &.Switch-checked {
-    background: ${mainColor};
+    background: ${props => props.color};
   }
 `;
 
@@ -73,6 +78,8 @@ export default function CustomSwitch(props: UseSwitchProps) {
   const { getInputProps, checked: c, disabled, focusVisible } = useSwitch(props);
   const [checked, setChecked] = React.useState(c);
 
+  const theme = useTheme();
+
   React.useEffect(() => {
     setChecked(c);
   }, [c]);
@@ -89,6 +96,7 @@ export default function CustomSwitch(props: UseSwitchProps) {
       onClick={() => {
         setChecked(state => !state);
       }}
+      color={theme.palette.primary.main}
     >
       <CustomSwitchThumb className={clsx(stateClasses)} />
       <CustomSwitchInput {...getInputProps()} aria-label="Demo switch" />

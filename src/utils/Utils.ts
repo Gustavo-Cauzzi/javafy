@@ -35,7 +35,6 @@ export const getMainTableName = (sql: string): null | string => {
 
     try {
         wordByWord.forEach((word, index, array) => {
-            console.log('word: ', word, selectDepth);
             if (word.toLowerCase() === 'select') selectDepth++;
             else if (word.toLowerCase() === 'from') {
                 selectDepth--;
