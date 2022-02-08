@@ -2,7 +2,7 @@ import { Autocomplete, Button, Checkbox, IconButton, TextField, Theme, Tooltip, 
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { FiInfo, FiMoon, FiSun } from 'react-icons/fi';
-import { useMode } from '../../hooks/designMode';
+import { useMode } from '../../hooks/mode';
 import CustomSwitch from '../../shared/components/CustomSwitch';
 import { getMainTableName, indentStringWithTab, standardizeParamsInQuery, toCamel } from '../../utils/Utils';
 
@@ -249,7 +249,7 @@ const MainNl: React.FC = () => {
         className="min-w-screen min-h-screen"
         style={{ background: theme.palette.background.default, transition: 'background 0.5s' }}
       >
-        <div className="lg:absolute lg:top-0 lg:left-0 py-3 px-10 flex justify-center lg:justify-start relative w-full gap-5">
+        <div className="lg:absolute lg:top-0 lg:left-0 py-5 pl-10 pr-7 flex justify-center lg:justify-start relative w-full gap-5">
           <div className="flex gap-5 w-full items-center">
             <Autocomplete
               options={projects}

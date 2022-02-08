@@ -1,12 +1,15 @@
-import { Button, TextField } from '@mui/material';
+import { Button, IconButton, TextField, useTheme } from '@mui/material';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { FiMoon, FiSun } from 'react-icons/fi';
 import CustomSwitch from '../../shared/components/CustomSwitch';
 import { darkColor, lightColor } from '../../shared/theme/Theme';
+import { useMode } from '../../hooks/mode';
 
 const Main: React.FC = () => {
-  const navigate = useNavigate();
+  const theme = useTheme();
+
+  const { setMode } = useMode();
 
   const [javafy, setJavafy] = useState(true);
   const [varName, setVarName] = useState('sql');
@@ -93,60 +96,75 @@ const Main: React.FC = () => {
 
   return (
     <>
-      <button className="hidden" id="goto" onClick={() => navigate('/nl')}></button>
-
-      <div className="py-10 flex w-full justify-center items-center flex-col">
-        <h1 className="text-3xl">{javafy ? 'Javafy SQL' : 'SQLify Java'}</h1>
-        <h3 className="text-lg">
-          or try{' '}
-          <a onClick={() => setJavafy(state => !state)} className="cursor-pointer hover:underline font-bold">
-            {javafy ? 'Sqlfy' : 'Javafy'}
-          </a>
-        </h3>
-      </div>
-
-      <div className="flex w-full justify-around px-10 flex-col gap-5 lg:flex-row">
-        <TextField
-          value={text1}
-          multiline
-          fullWidth
-          minRows={15}
-          onChange={e => setText1(e.target.value)}
-          placeholder={javafy ? 'Paste your sql here' : 'Paste your java here'}
-        ></TextField>
-        <div className="flex flex-row lg:flex-col justify-around lg:justify-start w-full items-center lg:max-w-24 gap-7 px-2 py-4">
-          <Button variant="contained" onClick={javafy ? handleJavafy : handleSQLify}>
-            {javafy ? 'Javafy' : 'SQLify'}!
-          </Button>
-
-          <div className="flex items-center lg:flex-col">
-            {javafy ? 'SQLify' : <b>SQLify</b>}
-            <div className="flex lg:rotate-90 lg:transform-gpu lg:my-1">
-              <CustomSwitch checked={javafy} onChange={() => setJavafy(state => !state)} />
-            </div>
-            {javafy ? <b>Javafy</b> : 'Javafy'}
+      <main
+        className="min-w-screen min-h-screen"
+        style={{ background: theme.palette.background.default, transition: 'background 0.5s' }}
+      >
+        <div className="absolute right-0 top-0 py-3 px-7">
+          <div>
+            <IconButton onClick={() => setMode(state => (state === 'light' ? 'dark' : 'light'))}>
+              {theme.palette.mode === 'light' ? (
+                <FiMoon size={28} color={theme.palette.primary.main} />
+              ) : (
+                <FiSun size={28} color={theme.palette.primary.light} />
+              )}
+            </IconButton>
           </div>
-
-          {javafy && (
-            <TextField
-              value={varName}
-              onChange={e => setVarName(e.target.value)}
-              label="Var"
-              inputProps={{ style: { textAlign: 'center' } }}
-              size="small"
-              error={varName.length === 0}
-            />
-          )}
         </div>
-        <TextField
-          value={text2}
-          onChange={e => setText2(e.target.value)}
-          multiline
-          fullWidth
-          minRows={15}
-          placeholder={javafy ? 'Here is your javafied query...' : 'Here is your SQL query...'}
-        ></TextField>
-      </div>
+
+        <div className="py-10 flex w-full justify-center items-center flex-col">
+          <h1 className="text-3xl">{javafy ? 'Javafy SQL' : 'SQLify Java'}</h1>
+          <h3 className="text-lg">
+            or try{' '}
+            <a onClick={() => setJavafy(state => !state)} className="cursor-pointer hover:underline font-bold">
+              {javafy ? 'Sqlfy' : 'Javafy'}
+            </a>
+          </h3>
+        </div>
+
+        <div className="flex w-full justify-around px-10 flex-col gap-5 lg:flex-row">
+          <TextField
+            value={text1}
+            multiline
+            fullWidth
+            minRows={15}
+            onChange={e => setText1(e.target.value)}
+            placeholder={javafy ? 'Paste your sql here' : 'Paste your java here'}
+          ></TextField>
+          <div className="flex flex-row lg:flex-col justify-around lg:justify-start w-full items-center lg:max-w-24 gap-7 px-2 py-4">
+            <Button variant="contained" onClick={javafy ? handleJavafy : handleSQLify}>
+              {javafy ? 'Javafy' : 'SQLify'}!
+            </Button>
+
+            <div className="flex items-center lg:flex-col">
+              {javafy ? 'SQLify' : <b>SQLify</b>}
+              <div className="flex lg:rotate-90 lg:transform-gpu lg:my-1">
+                <CustomSwitch checked={javafy} onChange={() => setJavafy(state => !state)} />
+              </div>
+              {javafy ? <b>Javafy</b> : 'Javafy'}
+            </div>
+
+            {javafy && (
+              <TextField
+                value={varName}
+                onChange={e => setVarName(e.target.value)}
+                label="Var"
+                inputProps={{ style: { textAlign: 'center' } }}
+                size="small"
+                error={varName.length === 0}
+              />
+            )}
+          </div>
+          <TextField
+            value={text2}
+            onChange={e => setText2(e.target.value)}
+            multiline
+            fullWidth
+            minRows={15}
+            placeholder={javafy ? 'Here is your javafied query...' : 'Here is your SQL query...'}
+          ></TextField>
+        </div>
+      </main>
     </>
   );
 };

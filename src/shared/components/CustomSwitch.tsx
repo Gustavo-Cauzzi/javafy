@@ -2,7 +2,7 @@ import * as React from 'react';
 import clsx from 'clsx';
 import { styled } from '@mui/system';
 import { useSwitch, UseSwitchProps } from '@mui/base/SwitchUnstyled';
-import { useMode } from '../../hooks/designMode';
+import { useMode } from '../../hooks/mode';
 import { useTheme } from '@mui/material';
 
 const blue = {

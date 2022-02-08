@@ -1,5 +1,5 @@
 import { createTheme, darken, lighten, Theme } from '@mui/material';
-import { Mode } from '../../hooks/designMode';
+import { Mode } from '../../hooks/mode';
 
 export const lightColor = '#e6e9d9';
 export const mainColor = darken('#e6e9d9', 0.45);

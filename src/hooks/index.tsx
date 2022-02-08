@@ -1,5 +1,5 @@
 import React from 'react';
-import { ModeProvider } from './designMode';
+import { ModeProvider } from './mode';
 
 const StateProviders: React.FC = ({ children }) => {
   return <ModeProvider>{children}</ModeProvider>;

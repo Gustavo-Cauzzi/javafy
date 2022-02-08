@@ -1,6 +1,6 @@
 import { ThemeProvider } from '@mui/material';
 import React from 'react';
-import { useMode } from '../../hooks/designMode';
+import { useMode } from '../../hooks/mode';
 import { theme } from './Theme';
 
 const JavafyTheme: React.FC = ({ children }) => {
