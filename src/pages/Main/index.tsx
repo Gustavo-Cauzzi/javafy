@@ -117,7 +117,7 @@ const Main: React.FC = () => {
           <h3 className="text-lg">
             or try{' '}
             <a onClick={() => setJavafy(state => !state)} className="cursor-pointer hover:underline font-bold">
-              {javafy ? 'Sqlfy' : 'Javafy'}
+              {javafy ? 'SQLify' : 'Javafy'}
             </a>
           </h3>
         </div>

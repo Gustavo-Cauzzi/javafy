@@ -10,13 +10,22 @@ interface ModeContextData {
 
 const ModeContext = createContext<ModeContextData>({} as ModeContextData);
 
+const darkModeSaved = localStorage.get('@javafy:darkMode'); // 0 ou 1
+const didUserSetDarkMode = darkModeSaved ? Boolean(JSON.parse(darkModeSaved)) : false;
+
 const ModeProvider: React.FC = ({ children }) => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const [mode, setMode] = useState<Mode>(prefersDarkMode ? 'dark' : 'light');
+  const [mode, setMode] = useState<Mode>(didUserSetDarkMode ? 'dark' : 'light');
 
   useEffect(() => {
+    if (didUserSetDarkMode) return;
+
     setMode(prefersDarkMode ? 'dark' : 'light');
   }, [prefersDarkMode]);
+
+  useEffect(() => {
+    localStorage.setItem('@javafy:darkMode', JSON.parse(String(Number(mode === 'dark')))); // 0 ou 1
+  }, [mode]);
 
   return <ModeContext.Provider value={{ mode, setMode }}>{children}</ModeContext.Provider>;
 };
