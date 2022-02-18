@@ -1,9 +1,11 @@
 import { Autocomplete, Button, Checkbox, IconButton, TextField, Theme, Tooltip, useTheme } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { FiInfo, FiMoon, FiSun } from 'react-icons/fi';
 import { useMode } from '../../hooks/mode';
 import CustomSwitch from '../../shared/components/CustomSwitch';
+import { SpecialsComponentProps, SpecialsComponentRef } from '../../shared/components/specials/common';
+import DesperdiciosSpecials from '../../shared/components/specials/DesperdiciosSpecials';
 import { getMainTableName, indentStringWithTab, standardizeParamsInQuery, toCamel } from '../../utils/Utils';
 
 type Projects = Array<{
@@ -16,6 +18,9 @@ interface Config {
   customFormatString: (str: string, v?: string) => string;
   addJavaSpecials: (str: string, v?: string) => string;
   queryIndentLevel: number;
+  especialConfiguration?: React.ForwardRefExoticComponent<
+    SpecialsComponentProps & React.RefAttributes<SpecialsComponentRef>
+  >;
 }
 
 interface ProjectConfig {
@@ -40,6 +45,7 @@ const projectConfiguration: ProjectConfig = {
     defaultVar: 'sql',
     customFormatString: standardizeParamsInQuery,
     queryIndentLevel: 0,
+    especialConfiguration: DesperdiciosSpecials,
     addJavaSpecials: function (str: string, v?: string) {
       const params = Array.from(
         new Set(
@@ -143,6 +149,8 @@ const MainNl: React.FC = () => {
     Boolean(JSON.parse(localStorage.getItem('@javafy/removeJava') ?? '0') as number),
   );
 
+  const specialConfigComponentRef = useRef<SpecialsComponentRef>(null);
+
   useEffect(() => {
     if (text1) handleJavafy();
   }, [project]);
@@ -193,8 +201,12 @@ const MainNl: React.FC = () => {
     const final = [`StringBuilder ${varName} = new StringBuilder();`, '', ...sqledLine].join('\n');
 
     const valueWithProjectSpecials = projectConfiguration[project.id].addJavaSpecials(final, varName);
+    const finalString = valueWithProjectSpecials.trim();
 
-    setText2(valueWithProjectSpecials.trim());
+    console.log('specialConfigComponentRef: ', specialConfigComponentRef);
+    specialConfigComponentRef.current?.executeFormatting
+      ? specialConfigComponentRef.current?.executeFormatting(finalString)
+      : setText2(finalString);
   };
 
   const handleSQLify = () => {
@@ -360,6 +372,21 @@ const MainNl: React.FC = () => {
                 </div>
               </Tooltip>
             )}
+
+            {(() => {
+              const SpecialConfigComponent = projectConfiguration[project.id].especialConfiguration;
+              return SpecialConfigComponent ? (
+                <SpecialConfigComponent
+                  str={text2}
+                  onChange={newValue => {
+                    setText2(newValue);
+                  }}
+                  ref={specialConfigComponentRef}
+                />
+              ) : (
+                <></>
+              );
+            })()}
           </div>
           <TextField
             value={noJavaQuery && javafy ? unjavafyJavaQuery(text2) : text2}

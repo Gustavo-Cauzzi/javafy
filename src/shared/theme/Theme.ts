@@ -1,9 +1,14 @@
-import { createTheme, darken, lighten, Theme } from '@mui/material';
+import { createTheme, darken, lighten, rgbToHex, Theme } from '@mui/material';
 import { Mode } from '../../hooks/mode';
 
 export const lightColor = '#e6e9d9';
 export const mainColor = darken('#e6e9d9', 0.45);
 export const darkColor = darken('#e6e9d9', 0.65);
+
+console.log('mainColor: ', rgbToHex(mainColor));
+console.log("darken(z#e5e5e5', 0.45): ", rgbToHex(darken('#e5e5e5', 0.45)));
+console.log("darken('#e5e5e5', 0.65): ", rgbToHex(darken('#e5e5e5', 0.65)));
+console.log('darkColor: ', rgbToHex(darkColor));
 
 const isDarkMode = (mode: Mode) => mode === 'dark';
 const getCurrentPallete = (mode: Mode) => (isDarkMode(mode) ? { mode, ...darkPalette } : { mode, ...lightPalette });
