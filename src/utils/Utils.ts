@@ -1,8 +1,13 @@
 // faz uma string cammel case
-export const toCamel = (s: string) => {
-    return s.replace(/([-_][a-z])/gi, w => {
+export const toCamel = (s: string) =>
+    s.replace(/([-_][a-z])/gi, w => {
         return w.toUpperCase().replace('-', '').replace('_', '');
     });
+
+const detectParamSymbol = (param: string) => {
+    if (param.includes(':')) return ':';
+    if (param.includes('&')) return '&';
+    return '';
 };
 
 // par_id_restaurante - ERRADO
@@ -16,8 +21,9 @@ export const standardizeParamsInQuery = (str: string) =>
 
             const hasInitialParenthesis = word[0] === '(' ? '(' : '';
             const hasFinalParenthesis = word[word.length - 1] === ')' ? ')' : '';
-            const newParamName = toCamel(word.split(':par_')[1]);
-            return `${hasInitialParenthesis}:par_${newParamName}${hasFinalParenthesis}`;
+            const symbol = detectParamSymbol(word);
+            const newParamName = toCamel(word.split('par_')[1]);
+            return `${hasInitialParenthesis}${symbol}par_${newParamName}${hasFinalParenthesis}`;
         })
         .join(' ');
 
@@ -41,6 +47,7 @@ export const getMainTableName = (sql: string): null | string => {
         }
     }
 
+    console.log('tableName: ', tableName);
     return tableName;
 };
 
