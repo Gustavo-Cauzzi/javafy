@@ -19,7 +19,18 @@
     },
     "plugins": ["react", "@typescript-eslint", "react-hooks", "prettier"],
     "rules": {
-        "prettier/prettier": "error",
+        "prettier/prettier": [
+            "error",
+            {
+                "endOfLine": "auto"
+            }
+        ],
+        "no-plusplus": "off",
+        "import/prefer-default-export": "off",
+        "import/extensions": "off",
+        "react/jsx-props-no-spreading": "off",
+        "react/jsx-filename-extension": [1, { "extensions": [".ts", ".tsx"] }],
+        "react/function-component-definition": "off",
         "object-shorthand": ["warn", "always", { "avoidExplicitReturnArrows": true }],
         "no-console": "off",
         "react/react-in-jsx-scope": "off",
@@ -71,15 +82,7 @@
         "complexity": ["error", 40],
         "no-invalid-this": "off",
         "react/prop-types": "off",
-        "react/display-name": "off",
-        "import/extensions": [
-            "error",
-            "ignorePackages",
-            {
-                "ts": "never",
-                "tsx": "never"
-            }
-        ]
+        "react/display-name": "off"
     },
     "settings": {
         "import/resolver": {

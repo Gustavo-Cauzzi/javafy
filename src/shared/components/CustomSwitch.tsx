@@ -1,13 +1,9 @@
-import * as React from 'react';
-import clsx from 'clsx';
-import { styled } from '@mui/system';
+/* eslint-disable import/no-extraneous-dependencies */
 import { useSwitch, UseSwitchProps } from '@mui/base/SwitchUnstyled';
-import { useMode } from '../../hooks/mode';
 import { useTheme } from '@mui/material';
-
-const blue = {
-  500: '#007FFF',
-};
+import { styled } from '@mui/system';
+import clsx from 'clsx';
+import { useState, useEffect } from 'react';
 
 const grey = {
   400: '#BFC7CF',
@@ -76,11 +72,11 @@ const CustomSwitchThumb = styled('span')`
 
 export default function CustomSwitch(props: UseSwitchProps) {
   const { getInputProps, checked: c, disabled, focusVisible } = useSwitch(props);
-  const [checked, setChecked] = React.useState(c);
+  const [checked, setChecked] = useState(c);
 
   const theme = useTheme();
 
-  React.useEffect(() => {
+  useEffect(() => {
     setChecked(c);
   }, [c]);
 

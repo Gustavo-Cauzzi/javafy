@@ -1,11 +1,11 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 export type Mode = 'light' | 'dark';
 
 interface ModeContextData {
   mode: Mode;
-  setMode: (mode: Mode | ((mode: Mode) => Mode)) => any;
+  setMode: (mode: Mode | ((m: Mode) => Mode)) => any;
 }
 
 const ModeContext = createContext<ModeContextData>({} as ModeContextData);
@@ -27,13 +27,13 @@ const ModeProvider: React.FC = ({ children }) => {
     localStorage.setItem('@javafy:darkMode', JSON.parse(String(Number(mode === 'dark')))); // 0 ou 1
   }, [mode]);
 
-  return <ModeContext.Provider value={{ mode, setMode }}>{children}</ModeContext.Provider>;
+  return (
+    <ModeContext.Provider value={useMemo(() => ({ mode, setMode }), [mode, setMode])}>{children}</ModeContext.Provider>
+  );
 };
 
 function useMode(): ModeContextData {
-  const context = useContext(ModeContext);
-
-  return context;
+  return useContext(ModeContext);
 }
 
 export { ModeProvider, useMode };

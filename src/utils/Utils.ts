@@ -16,12 +16,10 @@ export const standardizeParamsInQuery = (str: string) => {
 
     let index = 0;
 
-    str = str
+    return str
         .split(' ')
         .map(word => (word.includes('par_') ? `:${params[index++]}` : word))
         .join(' ');
-
-    return str;
 };
 
 export const getMainTableName = (sql: string): null | string => {
@@ -33,19 +31,15 @@ export const getMainTableName = (sql: string): null | string => {
         .join('')
         .split(' ');
 
-    try {
-        wordByWord.forEach((word, index, array) => {
-            if (word.toLowerCase() === 'select') selectDepth++;
-            else if (word.toLowerCase() === 'from') {
-                selectDepth--;
-                if (!selectDepth) {
-                    tableName = array[index + 1] ?? null;
-                    throw 'break';
-                }
+    for (let index = 0; index < wordByWord.length; index++) {
+        const word = wordByWord[index];
+        if (word.toLowerCase() === 'select') selectDepth++;
+        else if (word.toLowerCase() === 'from') {
+            selectDepth--;
+            if (!selectDepth) {
+                tableName = wordByWord[index + 1] ?? null;
             }
-        });
-    } catch (error) {
-        // Só pra cancelar o forEach
+        }
     }
 
     return tableName;
