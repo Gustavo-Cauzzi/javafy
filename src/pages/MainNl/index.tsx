@@ -23,10 +23,6 @@ interface Config {
   >;
 }
 
-interface ProjectConfig {
-  [key: number]: Config;
-}
-
 const projects: Projects = [
   { id: 0, label: 'Padrão' },
   { id: 1, label: 'Controle de desperdícios' },
@@ -34,7 +30,7 @@ const projects: Projects = [
   // { id: 3, label: 'Novo RE' },
 ];
 
-const projectConfiguration: ProjectConfig = {
+const projectConfiguration: Record<number, Config> = {
   0: {
     defaultVar: 'sql',
     queryIndentLevel: 0,
@@ -46,7 +42,7 @@ const projectConfiguration: ProjectConfig = {
     customFormatString: standardizeParamsInQuery,
     queryIndentLevel: 0,
     especialConfiguration: DesperdiciosSpecials,
-    addJavaSpecials(str: string, v?: string) {
+    addJavaSpecials(str: string, varName?: string) {
       const params = Array.from(
         new Set(
           str
@@ -57,7 +53,7 @@ const projectConfiguration: ProjectConfig = {
         ),
       );
 
-      const query = `${str}\nQuery query = em.createNativeQuery(${v ?? this.defaultVar}.toString(), Tuple.class);
+      const query = `${str}\nQuery query = em.createNativeQuery(${varName ?? this.defaultVar}.toString(), Tuple.class);
       ${params
         .map(param => `\nquery.setParameter("${param.replace(':', '')}", ${param.replace(':', '').split('par_')[1]});`)
         .join('')}
@@ -148,6 +144,7 @@ const MainNl: React.FC = () => {
   );
 
   const specialConfigComponentRef = useRef<SpecialsComponentRef>(null);
+  const javafyButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleJavafy = () => {
     if (varName === '') {
@@ -197,7 +194,6 @@ const MainNl: React.FC = () => {
     const valueWithProjectSpecials = projectConfiguration[project.id].addJavaSpecials(final, varName);
     const finalString = valueWithProjectSpecials.trim();
 
-    console.log('specialConfigComponentRef: ', specialConfigComponentRef);
     if (specialConfigComponentRef.current?.executeFormatting) {
       specialConfigComponentRef.current?.executeFormatting(finalString);
     } else {
@@ -255,6 +251,21 @@ const MainNl: React.FC = () => {
     });
   };
 
+  const handleText1KeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.ctrlKey && e.code === 'KeyV') {
+      if (window.innerWidth >= 1024) {
+        setTimeout(
+          () =>
+            javafyButtonRef.current?.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
+            }),
+          0,
+        );
+      }
+    }
+  };
+
   return (
     <main
       className="min-w-screen min-h-screen"
@@ -310,6 +321,7 @@ const MainNl: React.FC = () => {
         <h3 className="text-lg">
           ou troque para{' '}
           <button
+            ref={javafyButtonRef}
             type="button"
             onClick={() => setJavafy(state => !state)}
             className="cursor-pointer hover:underline font-bold"
@@ -326,6 +338,7 @@ const MainNl: React.FC = () => {
           fullWidth
           minRows={15}
           onChange={e => setText1(e.target.value)}
+          onKeyDown={handleText1KeyDown}
           placeholder={javafy ? 'Coloque seu SQL aqui' : 'Coloque seu java aqui'}
         />
         <div className="flex flex-row lg:flex-col justify-around lg:justify-start w-full items-center lg:max-w-24 gap-7 px-2 py-4">

@@ -18,9 +18,7 @@ const DesperdiciosSpecials = forwardRef<SpecialsComponentRef, SpecialsComponentP
   const [hashmap, setHashmap] = useState(false);
 
   const executeFormatting = (value?: string) => {
-    console.log(value ? `value ${value}` : `str ${str}`);
     if (!value && !str) return;
-    console.log('hashmap', hashmap);
 
     const stringToParse = value && value !== '' ? value : str;
 
