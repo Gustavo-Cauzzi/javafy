@@ -8,19 +8,18 @@ export const toCamel = (s: string) => {
 // par_id_restaurante - ERRADO
 // par_idRestaurante - CERTO
 // standardizeParamsInQuery corrige todos os parametros para ficarem no padrão
-export const standardizeParamsInQuery = (str: string) => {
-    const params = str
+export const standardizeParamsInQuery = (str: string) =>
+    str
         .split(' ')
-        .filter(word => word.includes('par_'))
-        .map(param => `par_${toCamel(param.split(':par_')[1])}`);
+        .map(word => {
+            if (!word.includes('par_')) return word;
 
-    let index = 0;
-
-    return str
-        .split(' ')
-        .map(word => (word.includes('par_') ? `:${params[index++]}` : word))
+            const hasInitialParenthesis = word[0] === '(' ? '(' : '';
+            const hasFinalParenthesis = word[word.length - 1] === ')' ? ')' : '';
+            const newParamName = toCamel(word.split(':par_')[1]);
+            return `${hasInitialParenthesis}:par_${newParamName}${hasFinalParenthesis}`;
+        })
         .join(' ');
-};
 
 export const getMainTableName = (sql: string): null | string => {
     let selectDepth = 0;
